@@ -1,0 +1,15 @@
+<canvas width=500 height=500></canvas>
+<script>
+canvas = document.getElementsByTagName("canvas")[0]
+context = canvas.getContext("2d")
+
+context.fillStyle = "blue"
+context.fillRect(0,0,500,500)
+
+context.fillStyle = "black"
+size = 500/9
+for (i = 1; i <= 9; i++) {
+  context.fillRect(size*i,0,1,500)
+  context.fillRect(0,size*i,500,1)
+}
+</script>
