@@ -1,16 +1,18 @@
 import mines
 from tkinter import *
+import time
 
 xmax = 500
 ymax = 500
-numRows = 9
-numCols = 9
+numRows = mines.NUMBER_OF_ROWS
+numCols = mines.NUMBER_OF_COLS
 row = ymax / numRows
 col = xmax / numCols
-numMines = 10
-colors = ["blue", "green", "red", "purple", "orange", "black"]
+numMines = mines.NUMBER_OF_MINES
+colors = ["blue", "green", "red", "purple", "orange", "black", "black", "black"]
+startTime = 0
 
-board = mines.initBoard()
+board = []
 minesBoard = []
 
 def relative_rectangle(c, x, y, xrel, yrel, fill="white"):
@@ -25,11 +27,19 @@ def centeredText(c, j, i, text, color="black"):
 c = Canvas(width=xmax, height=ymax)
 c.pack()
 
-c.create_rectangle(0,0,xmax,ymax,fill="blue")
-for i in range(numRows):
-    relative_line(c, 0, row*i, xmax, 0)
-for i in range(numCols):
-    relative_line(c, col*i, 0, 0, ymax)
+def init(_=None):
+    global board, minesBoard
+    c.create_rectangle(0,0,xmax,ymax,fill="blue")
+    for i in range(numRows):
+        relative_line(c, 0, row*i, xmax, 0)
+    for i in range(numCols):
+        relative_line(c, col*i, 0, 0, ymax)
+
+    board = mines.initBoard()
+    minesBoard = []
+
+    c.bind("<Button-1>", onclick)
+    c.bind("<Button-3>", onclick)
 
 def updateBoard(board):
     count = 0
@@ -48,22 +58,33 @@ def updateBoard(board):
             except Exception as e:
                 pass
     if count == numMines:
-        print("Congratulations!")
-        c.bind("<Button-1>", exit)
+        gameOver("win")
+
+def gameOver(e):
+    relative_rectangle(c, 0, 0, 500, 500, "white")
+    if e == "win":
+        c.create_text(250, 250, text="Congratulations!")
+        c.create_text(250, 300, text="Time : " + str(round(time.perf_counter()-startTime,1)) + "s")
+    else:
+        c.create_text(250, 250, text="Game Over!")
+    c.bind("<Button-1>", init)
+
+def exitGame(_):
+    exit()
 
 def onclick(e):
-    global board, minesBoard
+    global board, minesBoard, startTime
     curCol = int(e.x/xmax*numCols)
     curRow = int(e.y/ymax*numRows)
     if e.num == 1:
         if not minesBoard:
             minesBoard = mines.initMines(board, curRow, curCol)
+            startTime = time.perf_counter()
         result, board = mines.reveal(board, minesBoard, curRow, curCol)
         if result == "bomb":
-            print("Game Over!")
             for bomb in minesBoard:
                 relative_rectangle(c, bomb[1]*col, bomb[0]*row, col, row, "red")
-            c.bind("<Button-1>", exit)
+            c.bind("<Button-1>", gameOver)
     elif e.num == 3:
         if board[curRow][curCol] == "?":
             board[curRow][curCol] = "F"
@@ -73,7 +94,6 @@ def onclick(e):
             c.delete(ref)
     updateBoard(board)
 
-c.bind("<Button-1>", onclick)
-c.bind("<Button-3>", onclick)
+init()
 
 c.mainloop()
