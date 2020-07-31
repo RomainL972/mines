@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import mines
 from tkinter import *
 import time
