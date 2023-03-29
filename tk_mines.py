@@ -44,14 +44,14 @@ class TKMines:
 
     def update_board(self) -> None:
         count = 0
-        for i in range(len(self.board.board)):
-            for j in range(len(self.board.board[i])):
-                char = self.board.board[i][j]
+        for i in range(len(self.board._board)):
+            for j in range(len(self.board._board[i])):
+                char = self.board._board[i][j]
                 if char != "?" and "F" not in str(char):
                     self.relative_rectangle(j * col, i * row, col, row)
                 else:
                     if char == "F":
-                        self.board.board[i][j] = "F" + str(self.centeredText(j, i, "F", "red"))
+                        self.board._board[i][j] = "F" + str(self.centeredText(j, i, "F", "red"))
                     count += 1
                 try:
                     number = int(char)
@@ -84,11 +84,11 @@ class TKMines:
                     self.relative_rectangle(bomb[1] * col, bomb[0] * row, col, row, "red")
                 self.canvas.bind("<Button-1>", self.gameOver)
         elif e.num == 3:
-            if self.board.board[curRow][curCol] == "?":
-                self.board.board[curRow][curCol] = "F"
-            elif "F" in str(self.board.board[curRow][curCol]):
-                ref = str(self.board.board[curRow][curCol]).split("F")[1]
-                self.board.board[curRow][curCol] = "?"
+            if self.board._board[curRow][curCol] == "?":
+                self.board._board[curRow][curCol] = "F"
+            elif "F" in str(self.board._board[curRow][curCol]):
+                ref = str(self.board._board[curRow][curCol]).split("F")[1]
+                self.board._board[curRow][curCol] = "?"
                 self.canvas.delete(ref)
         self.update_board()
 

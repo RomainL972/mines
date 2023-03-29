@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as expected
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class SeleniumWrapper:
@@ -42,10 +43,13 @@ class SeleniumWrapper:
     def click(self, selector_name, selector_value):
         self.wait.until(expected.element_to_be_clickable((self.SELECTORS[selector_name], selector_value))).click()
 
-    def right_click(self, selector_name, selector_value):
-        element = self.get_element(selector_name, selector_value)
+    def right_click_element(self, element: WebElement):
         action_chains = ActionChains(self.driver)
         action_chains.context_click(element).perform()
+
+    def right_click(self, selector_name, selector_value):
+        element = self.get_element(selector_name, selector_value)
+        self.right_click_element(element)
 
     def try_call(self, selector_name, selector_value, function, parent=None, small_wait=False):
         try:

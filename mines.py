@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import math
 import random
+from typing import Literal
 
 from board import AbsBoard
 
@@ -11,7 +12,7 @@ NUMBER_OF_COLS = 16
 
 class Board(AbsBoard):
     def __init__(self) -> None:
-        self.board: list[list[str | int]] = [["?" for _ in range(NUMBER_OF_COLS)] for _ in range(NUMBER_OF_ROWS)]
+        self._board: list[list[str | int]] = [["?" for _ in range(NUMBER_OF_COLS)] for _ in range(NUMBER_OF_ROWS)]
         self.mines: list[tuple[int, int]] = []
 
     def __str__(self) -> str:
@@ -21,9 +22,9 @@ class Board(AbsBoard):
         for i in range(NUMBER_OF_COLS):
             res += str(i).ljust(colindex_space, " ")
         res += "\n"
-        for i in range(len(self.board)):
+        for i in range(len(self._board)):
             res += str(i).ljust(rowindex_space, " ")
-            for char in self.board[i]:
+            for char in self._board[i]:
                 res += str(char).ljust(colindex_space, " ")
             res += "\n"
         return res
@@ -31,7 +32,7 @@ class Board(AbsBoard):
     def is_valid_pos(self, x: int, y: int) -> bool:
         return not (x < 0 or x > NUMBER_OF_ROWS - 1 or y < 0 or y > NUMBER_OF_COLS - 1)
 
-    def init_mines(self, x: int, y: int) -> None:
+    def _init_mines(self, x: int, y: int) -> None:
         safe = []
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
@@ -43,11 +44,25 @@ class Board(AbsBoard):
                 x, y = random.randint(0, NUMBER_OF_ROWS - 1), random.randint(0, NUMBER_OF_COLS - 1)
             self.mines.append((x, y))
 
+    def get(self, x: int, y: int) -> Literal["?"] | Literal[" "] | int | None:
+        if not self.is_valid_pos(x, y):
+            return None
+        return self._board[x][y]
+
+    def flag(self, x: int, y: int, state: bool):
+        if not self.is_valid_pos(x, y) or self._board[x][y] not in ("?", "F"):
+            return None
+        if state:
+            self._board[x][y] = "F"
+        else:
+            self._board[x][y] = "?"
+
+
     def reveal(self, x: int, y: int) -> str | int | None:
         if len(self.mines) == 0:
-            self.init_mines(x, y)
+            self._init_mines(x, y)
 
-        if self.board[x][y] != "?":
+        if self._board[x][y] != "?":
             return None
         if (x, y) in self.mines:
             return "bomb"
@@ -61,11 +76,11 @@ class Board(AbsBoard):
                     else:
                         check.append((i, j))
         if count == 0:
-            self.board[x][y] = " "
+            self._board[x][y] = " "
             for x, y in check:
                 self.reveal(x, y)
         else:
-            self.board[x][y] = count
+            self._board[x][y] = count
         return count
 
 
@@ -81,10 +96,10 @@ def main() -> None:
                 print("Wrong coordinates")
                 continue
             if "f" in coord:
-                if board.board[x][y] == "?":
-                    board.board[x][y] = "F"
-                elif board.board[x][y] == "F":
-                    board.board[x][y] = "?"
+                if board.get(x, y) == "?":
+                    board.flag(x, y, True)
+                elif board.get(x, y) == "F":
+                    board.flag(x, y, False)
                 continue
         except Exception:
             print("Wrong coordinates")
